@@ -181,14 +181,36 @@ def analyze_dungeon(dungeon):
     
 
 if __name__ == "__main__":
+    import sys
+    
+    # Fix Windows console encoding for emojis
+    if sys.platform == 'win32':
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+        except AttributeError:
+            import io
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    
     print("=" * 60)
     print("🌀 EntroPit - Probabilistic Dungeon Generator")
     print("   Powered by THRML & Thermodynamic Computing")
     print("=" * 60)
     print()
     
+    # Use a different seed each run for variety, or pass one as argument
+    # Example: python entropit_quickstart.py 123
+    if len(sys.argv) > 1:
+        seed = int(sys.argv[1])
+        print(f"📌 Using seed: {seed}")
+    else:
+        import random
+        seed = random.randint(0, 999999)
+        print(f"🎲 Random seed: {seed} (use 'python entropit_quickstart.py {seed}' to reproduce)")
+    
+    print()
+    
     # Generate dungeons using Gibbs sampling
-    dungeons, nodes = create_simple_dungeon(grid_size=12, seed=42)
+    dungeons, nodes = create_simple_dungeon(grid_size=12, seed=seed)
     
     # Visualize the results
     visualize_dungeons(dungeons, n_show=4)
@@ -201,6 +223,8 @@ if __name__ == "__main__":
     print("🎉 Success! Your probabilistic dungeon generator works!")
     print()
     print("Experiment:")
+    print("  • Run again for different dungeons (random seed each time)")
+    print("  • Use: python entropit_quickstart.py <seed> for reproducibility")
     print("  • Modify parameters in create_simple_dungeon()")
     print("  • Try different grid_size values (8, 16, 24, 32)")
     print("  • Adjust beta (temperature), biases, weights")

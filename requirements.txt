@@ -13,10 +13,12 @@ matplotlib>=3.7.0
 pillow>=10.0.0
 numpy>=1.24.0
 
-# UI (for interactive version)
+# Analysis & Benchmarking
+networkx>=3.0  # Connectivity analysis and graph algorithms
+
+# UI (optional - for interactive version)
 gradio>=4.0.0
 
 # Optional: for advanced features
-networkx>=3.0  # For connectivity analysis
 scipy>=1.10.0  # For spatial algorithms
 
