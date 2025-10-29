@@ -1,18 +1,16 @@
-# 🏰 EntroPit
+# EntroPit
 
 **Probabilistic Dungeon Generation Powered by Thermodynamic Computing**
 
 EntroPit is a procedural dungeon generator that uses probabilistic graphical models (PGMs) and Gibbs sampling to create dungeons. Built on [THRML](https://github.com/extropic-ai/thrml), it demonstrates what's possible with thermodynamic computing—where sampling complex probability distributions becomes dramatically faster and more energy-efficient.
 
-<div align="center">
-  
-  **🎲 Constraint-Based • ⚡ GPU-Accelerated • 🔥 Thermodynamically Inspired**
-  
-</div>
+```
+    Constraint-Based | GPU-Accelerated | Thermodynamically Inspired
+```
 
 ---
 
-## 🎯 What It Does
+## What It Does
 
 EntroPit generates dungeons by modeling each tile as a node in an Ising-like energy-based model:
 
@@ -24,7 +22,7 @@ Think of it as **painting with probability** rather than deterministic algorithm
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
@@ -46,82 +44,88 @@ python entropit_ui.py
 Then open `http://localhost:7860` in your browser to:
 - Generate dungeons with different algorithms
 - Compare THRML vs traditional methods
-- Adjust parameters interactively
+- Adjust parameters interactively (now fully working!)
 - View connectivity metrics
 
-### Option 2: Command Line
+### Option 2: Use as Library
 
-```bash
-python entropit_quickstart.py
+```python
+from entropit import generate_thrml, generate_traditional, analyze_dungeon
+
+# Generate with THRML
+dungeons, metadata = generate_thrml(grid_size=16, beta=2.0, seed=42)
+metrics = analyze_dungeon(dungeons[0])
+
+# Generate with traditional method
+dungeon, metadata = generate_traditional("cellular_automata", grid_size=16, seed=42)
+metrics = analyze_dungeon(dungeon)
 ```
 
-Generates dungeons and saves to `entropit_dungeons.png`.
-
-### Option 3: Run Benchmarks
+### Option 3: Command Line Demo
 
 ```bash
-python benchmark.py
+python entropit_quickstart.py  # Simple demo
+python entropit.py             # Full comparison demo
+python benchmark.py            # Performance comparison
 ```
-
-Compare all methods with performance metrics and connectivity analysis.
 
 ---
 
-## 🧪 How to Experiment
+## How to Experiment
 
-### Tweak Parameters
+### Tweak Parameters (Now Interactive!)
 
-Open `entropit_quickstart.py` and modify:
+Use the Gradio UI (`python entropit_ui.py`) to adjust:
+- **Grid Size**: 8-32
+- **Temperature (beta)**: 0.5-5.0 (higher = more structured)
+- **Edge Bias**: -5.0 to 0.0 (more negative = thicker walls)
+- **Coupling Strength**: 0.3-2.0 (higher = bigger rooms)
 
-**Grid Size:**
+Or use the Python API:
+
 ```python
-dungeons, nodes = create_simple_dungeon(grid_size=20, seed=42)
-```
+from entropit import generate_thrml
 
-**Edge Bias** (more negative = thicker walls):
-```python
-biases.append(-2.0 if is_edge else 0.5)
-```
-
-**Coupling Strength** (higher = bigger rooms):
-```python
-weights = jnp.ones(len(edges)) * 0.8
-```
-
-**Temperature** (higher = more structured):
-```python
-beta = jnp.array(2.0)
+dungeons, metadata = generate_thrml(
+    grid_size=24,
+    beta=3.0,          # Temperature
+    edge_bias=-3.0,    # Wall preference
+    coupling=1.2,       # Room size
+    n_samples=5,
+    seed=42
+)
 ```
 
 ### Add Constraints
 
-Force a spawn point in the center by clamping specific nodes—see `ARCHITECTURE.md` for advanced techniques.
+See `ARCHITECTURE.md` for advanced techniques like clamping specific tiles.
 
 ---
 
-## 📚 Documentation & Files
+## Documentation & Files
 
 | File | Purpose |
 |------|---------|
 | **`README.md`** | This file - project overview and getting started |
 | **`ARCHITECTURE.md`** | Mathematical formulation, energy functions, PGM design |
-| **`entropit_quickstart.py`** | Command-line dungeon generator with THRML |
+| **`entropit.py`** | **Main module** - `generate_thrml()` and `generate_traditional()` APIs |
+| **`entropit_ui.py`** | Interactive Gradio web interface |
+| **`entropit_quickstart.py`** | Simple command-line demo |
 | **`traditional_generators.py`** | Baseline algorithms (Random, CA, BSP, Drunkard's Walk) |
 | **`benchmark.py`** | Comprehensive comparison framework |
-| **`entropit_ui.py`** | Interactive Gradio web interface |
 | **`requirements.txt`** | All dependencies |
 
 ---
 
-## 🎯 Why This Matters
+## Why This Matters
 
 **Key Insight from Benchmarks:**
 
 | Method | Speed | Connectivity | Quality |
 |--------|-------|--------------|---------|
-| Traditional (Random, CA) | ⚡ Fast | ❌ 0% | Low |
-| Traditional (BSP, Drunkard) | ⚡ Fast | ✅ 100% | Medium |
-| **THRML (Ising)** | 🐌 Slow | ✅ 100% | **High** |
+| Traditional (Random, CA) | Fast | 0% | Low |
+| Traditional (BSP, Drunkard) | Fast | 100% | Medium |
+| **THRML (Ising)** | Slow | **100%** | **High** |
 
 **The THRML Advantage:**
 - **Declarative Design**: Define *what* you want (constraints), not *how* to build it
@@ -136,21 +140,21 @@ This approach scales beyond dungeons to any constraint satisfaction problem:
 
 ---
 
-## ✅ Current Features
+## Current Features
 
 - [x] THRML-based generation using Ising model
 - [x] 4 traditional baseline algorithms for comparison
 - [x] Comprehensive benchmarking framework
 - [x] Connectivity analysis (NetworkX-based)
 - [x] Playability metrics
-- [x] Interactive web UI (Gradio)
+- [x] Interactive web UI (Gradio) with live parameter control
+- [x] Python API (`generate_thrml`, `generate_traditional`)
 - [x] Side-by-side comparison tool
 - [x] Windows compatibility fixes
 
-## 🎨 Future Features
+## Future Features
 
 - [ ] Interactive constraint painting (click to set walls/floors)
-- [ ] Live parameter adjustment in THRML
 - [ ] Categorical nodes (doors, treasure, enemies)
 - [ ] Multi-floor dungeons with staircases
 - [ ] Export to game engines (JSON, Godot, Unity)
@@ -160,7 +164,7 @@ This approach scales beyond dungeons to any constraint satisfaction problem:
 
 ---
 
-## 🔮 The Extropic Vision
+## The Extropic Vision
 
 Extropic is building specialized hardware that makes sampling from probability distributions vastly more efficient by leveraging physical thermodynamics.
 
@@ -170,7 +174,7 @@ When the hardware ships, this approach could generate massive dungeons in millis
 
 ---
 
-## 📚 Learning Resources
+## Learning Resources
 
 - [THRML Documentation](https://docs.thrml.ai/)
 - [THRML GitHub](https://github.com/extropic-ai/thrml)
@@ -179,11 +183,11 @@ When the hardware ships, this approach could generate massive dungeons in millis
 
 ---
 
-## 📄 License
+## License
 
 MIT License. Built as an educational demonstration of thermodynamic computing applications.
 
 ---
 
-**Let's build dungeons with physics.** 🔥⚔️
+**Let's build dungeons with physics.**
 

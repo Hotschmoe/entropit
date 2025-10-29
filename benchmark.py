@@ -136,8 +136,8 @@ def benchmark_generator(
     Returns:
         Dict with benchmark results
     """
-    print(f"\n📊 Benchmarking: {name}")
-    print(f"   Running {n_runs} iterations...")
+    print(f"\n[*] Benchmarking: {name}")
+    print(f"    Running {n_runs} iterations...")
     
     times = []
     all_scores = {
@@ -187,10 +187,10 @@ def benchmark_generator(
     }
     
     # Print summary
-    print(f"   ⏱️  Time: {results['avg_time_ms']:.2f}ms ± {results['std_time_ms']:.2f}ms")
-    print(f"   🔗 Connectivity: {results['connectivity_rate']*100:.0f}%")
-    print(f"   📏 Floor ratio: {results['metrics']['floor_ratio']['mean']:.2f} ± {results['metrics']['floor_ratio']['std']:.2f}")
-    print(f"   🏠 Openness: {results['metrics']['openness']['mean']:.2f} ± {results['metrics']['openness']['std']:.2f}")
+    print(f"    Time: {results['avg_time_ms']:.2f}ms +/- {results['std_time_ms']:.2f}ms")
+    print(f"    Connectivity: {results['connectivity_rate']*100:.0f}%")
+    print(f"    Floor ratio: {results['metrics']['floor_ratio']['mean']:.2f} +/- {results['metrics']['floor_ratio']['std']:.2f}")
+    print(f"    Openness: {results['metrics']['openness']['mean']:.2f} +/- {results['metrics']['openness']['std']:.2f}")
     
     return results
 
@@ -208,9 +208,9 @@ def compare_all_generators(grid_size: int = 24, n_runs: int = 10, seed: int = 42
     from entropit_quickstart import create_simple_dungeon
     
     print("=" * 70)
-    print("🏰 DUNGEON GENERATOR BENCHMARK")
-    print(f"   Grid Size: {grid_size}x{grid_size}")
-    print(f"   Runs per generator: {n_runs}")
+    print("    DUNGEON GENERATOR BENCHMARK")
+    print(f"    Grid Size: {grid_size}x{grid_size}")
+    print(f"    Runs per generator: {n_runs}")
     print("=" * 70)
     
     generators = [
@@ -228,7 +228,7 @@ def compare_all_generators(grid_size: int = 24, n_runs: int = 10, seed: int = 42
     
     # Print comparison table
     print("\n" + "=" * 70)
-    print("📊 COMPARISON SUMMARY")
+    print("    COMPARISON SUMMARY")
     print("=" * 70)
     print(f"{'Method':<20} {'Time (ms)':<12} {'Connected':<12} {'Floor %':<12} {'Openness':<12}")
     print("-" * 70)
@@ -275,7 +275,7 @@ def visualize_comparison(results: List[Dict]):
     
     plt.tight_layout()
     plt.savefig('benchmark_comparison.png', dpi=150, bbox_inches='tight')
-    print("\n💾 Saved: benchmark_comparison.png")
+    print("\n[+] Saved: benchmark_comparison.png")
     plt.show()
 
 

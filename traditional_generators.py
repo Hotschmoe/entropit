@@ -267,6 +267,6 @@ if __name__ == "__main__":
     
     plt.tight_layout()
     plt.savefig('traditional_comparison.png', dpi=150, bbox_inches='tight')
-    print("✅ Generated traditional_comparison.png")
+    print("[+] Generated traditional_comparison.png")
     plt.show()
 

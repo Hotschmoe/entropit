@@ -39,7 +39,7 @@ def create_simple_dungeon(grid_size=10, seed=42):
         dungeons: Array of sampled configurations [n_samples, grid_size, grid_size]
         nodes: 2D list of SpinNode objects
     """
-    print(f"🏰 Generating {grid_size}x{grid_size} dungeon with EntroPit...")
+    print(f"[*] Generating {grid_size}x{grid_size} dungeon with EntroPit...")
     
     # Step 1: Create the graph structure
     # ===================================
@@ -114,7 +114,7 @@ def create_simple_dungeon(grid_size=10, seed=42):
         steps_per_sample=20 # Steps between samples (for decorrelation)
     )
     
-    print("🔥 Running Gibbs sampling...")
+    print("[*] Running Gibbs sampling...")
     samples = sample_states(k_samp, program, schedule, init_state, [], [Block(flat_nodes)])
     
     # Step 5: Extract and reshape results
@@ -122,7 +122,7 @@ def create_simple_dungeon(grid_size=10, seed=42):
     # samples[0] has shape (n_samples, n_nodes) - reshape to grid
     dungeons = samples[0].reshape(schedule.n_samples, grid_size, grid_size)
     
-    print(f"✨ Generated {schedule.n_samples} dungeon variants!")
+    print(f"[+] Generated {schedule.n_samples} dungeon variants!")
     return dungeons, nodes
 
 
@@ -156,7 +156,7 @@ def visualize_dungeons(dungeons, n_show=4):
     
     plt.tight_layout()
     plt.savefig('entropit_dungeons.png', dpi=150, bbox_inches='tight')
-    print("💾 Saved visualization to 'entropit_dungeons.png'")
+    print("[+] Saved visualization to 'entropit_dungeons.png'")
     plt.show()
 
 
@@ -171,7 +171,7 @@ def analyze_dungeon(dungeon):
     total_tiles = dungeon.size
     wall_tiles = total_tiles - floor_tiles
     
-    print(f"\n📊 Dungeon Statistics:")
+    print(f"\n[*] Dungeon Statistics:")
     print(f"  • Size: {dungeon.shape[0]}x{dungeon.shape[1]}")
     print(f"  • Floor tiles: {floor_tiles} ({100*floor_tiles/total_tiles:.1f}%)")
     print(f"  • Wall tiles: {wall_tiles} ({100*wall_tiles/total_tiles:.1f}%)")
@@ -192,8 +192,8 @@ if __name__ == "__main__":
             sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     
     print("=" * 60)
-    print("🌀 EntroPit - Probabilistic Dungeon Generator")
-    print("   Powered by THRML & Thermodynamic Computing")
+    print("    EntroPit - Probabilistic Dungeon Generator")
+    print("       Powered by THRML & Thermodynamic Computing")
     print("=" * 60)
     print()
     
@@ -201,11 +201,11 @@ if __name__ == "__main__":
     # Example: python entropit_quickstart.py 123
     if len(sys.argv) > 1:
         seed = int(sys.argv[1])
-        print(f"📌 Using seed: {seed}")
+        print(f"[*] Using seed: {seed}")
     else:
         import random
         seed = random.randint(0, 999999)
-        print(f"🎲 Random seed: {seed} (use 'python entropit_quickstart.py {seed}' to reproduce)")
+        print(f"[*] Random seed: {seed} (use 'python entropit_quickstart.py {seed}' to reproduce)")
     
     print()
     
@@ -220,7 +220,7 @@ if __name__ == "__main__":
     
     print()
     print("=" * 60)
-    print("🎉 Success! Your probabilistic dungeon generator works!")
+    print("[+] Success! Your probabilistic dungeon generator works!")
     print()
     print("Experiment:")
     print("  • Run again for different dungeons (random seed each time)")

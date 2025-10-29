@@ -18,8 +18,7 @@ import io
 from PIL import Image
 
 # Import generators
-import traditional_generators as trad
-from entropit_quickstart import create_simple_dungeon
+from entropit import generate_traditional, generate_thrml, analyze_dungeon
 from benchmark import check_connectivity, calculate_playability_score
 
 
@@ -49,16 +48,16 @@ def render_dungeon(dungeon: np.ndarray, title: str = "") -> Image.Image:
     return img
 
 
-def generate_traditional(method: str, size: int, seed: int):
+def generate_traditional_ui(method: str, size: int, seed: int):
     """Generate using traditional methods"""
-    generators = {
-        "Random": lambda: trad.random_dungeon(size, size, 0.5, seed),
-        "Cellular Automata": lambda: trad.cellular_automata_dungeon(size, size, seed=seed),
-        "BSP": lambda: trad.bsp_dungeon(size, size, seed=seed),
-        "Drunkard's Walk": lambda: trad.drunkards_walk_dungeon(size, size, seed=seed)
+    method_map = {
+        "Random": "random",
+        "Cellular Automata": "cellular_automata",
+        "BSP": "bsp",
+        "Drunkard's Walk": "drunkards_walk"
     }
     
-    dungeon = generators[method]()
+    dungeon, metadata = generate_traditional(method_map[method], grid_size=size, seed=seed, verbose=False)
     
     # Calculate metrics
     is_connected, num_components = check_connectivity(dungeon)
@@ -70,47 +69,49 @@ def generate_traditional(method: str, size: int, seed: int):
     # Format metrics
     metrics_text = f"""
 ### Metrics:
-- **Connected**: {'✅ Yes' if is_connected else f'❌ No ({num_components} components)'}
+- **Connected**: {'[+] Yes' if is_connected else f'[-] No ({num_components} components)'}
 - **Floor Coverage**: {scores['floor_ratio']*100:.1f}%
 - **Openness**: {scores['openness']:.2f}
 - **Room Quality**: {scores['room_quality']:.3f}
+- **Generation Time**: {metadata['generation_time']*1000:.2f}ms
 """
     
     return img, metrics_text
 
 
-def generate_thrml(size: int, beta: float, edge_bias: float, coupling: float, seed: int):
+def generate_thrml_ui(size: int, beta: float, edge_bias: float, coupling: float, seed: int):
     """Generate using THRML"""
-    import jax.numpy as jnp
-    
-    # Temporarily modify parameters (this is a hack - should refactor)
-    # For now, we'll use create_simple_dungeon and note the limitation
-    dungeons, _ = create_simple_dungeon(grid_size=size, seed=seed)
-    dungeon = dungeons[0]  # Take first sample
+    dungeons, metadata = generate_thrml(
+        grid_size=size,
+        beta=beta,
+        edge_bias=edge_bias,
+        coupling=coupling,
+        n_samples=1,
+        seed=seed,
+        verbose=False
+    )
+    dungeon = dungeons[0]
     
     # Calculate metrics
-    dungeon_np = np.array(dungeon)
-    is_connected, num_components = check_connectivity(dungeon_np)
-    scores = calculate_playability_score(dungeon_np)
+    is_connected, num_components = check_connectivity(dungeon)
+    scores = calculate_playability_score(dungeon)
     
     # Create visualization
-    img = render_dungeon(dungeon_np, f"THRML Dungeon (β={beta})")
+    img = render_dungeon(dungeon, f"THRML Dungeon (beta={beta})")
     
     # Format metrics
     metrics_text = f"""
 ### Metrics:
-- **Connected**: {'✅ Yes' if is_connected else f'❌ No ({num_components} components)'}
+- **Connected**: {'[+] Yes' if is_connected else f'[-] No ({num_components} components)'}
 - **Floor Coverage**: {scores['floor_ratio']*100:.1f}%
 - **Openness**: {scores['openness']:.2f}
 - **Room Quality**: {scores['room_quality']:.3f}
+- **Generation Time**: {metadata['generation_time']:.2f}s
 
 ### Parameters:
-- Temperature (β): {beta}
+- Temperature (beta): {beta}
 - Edge Bias: {edge_bias}
-- Coupling: {coupling}
-
-*Note: Parameter sliders are for reference - implementation uses default values.*
-*See ARCHITECTURE.md for how to modify energy function.*
+- Coupling Strength: {coupling}
 """
     
     return img, metrics_text
@@ -118,7 +119,8 @@ def generate_thrml(size: int, beta: float, edge_bias: float, coupling: float, se
 
 def compare_all(size: int, seed: int):
     """Generate with all methods for side-by-side comparison"""
-    methods = ["Random", "Cellular Automata", "BSP", "Drunkard's Walk"]
+    method_names = ["Random", "Cellular Automata", "BSP", "Drunkard's Walk"]
+    method_keys = ["random", "cellular_automata", "bsp", "drunkards_walk"]
     
     # Create subplot
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))
@@ -126,33 +128,26 @@ def compare_all(size: int, seed: int):
     cmap = ListedColormap(['#2c3e50', '#ecf0f1'])
     
     # Traditional methods
-    for idx, method in enumerate(methods):
-        if method == "Random":
-            dungeon = trad.random_dungeon(size, size, 0.5, seed)
-        elif method == "Cellular Automata":
-            dungeon = trad.cellular_automata_dungeon(size, size, seed=seed)
-        elif method == "BSP":
-            dungeon = trad.bsp_dungeon(size, size, seed=seed)
-        else:  # Drunkard's Walk
-            dungeon = trad.drunkards_walk_dungeon(size, size, seed=seed)
+    for idx, (name, key) in enumerate(zip(method_names, method_keys)):
+        dungeon, _ = generate_traditional(key, grid_size=size, seed=seed, verbose=False)
         
         is_connected, _ = check_connectivity(dungeon)
         scores = calculate_playability_score(dungeon)
         
         axes[idx].imshow(dungeon, cmap=cmap, interpolation='nearest')
-        conn_icon = "✅" if is_connected else "❌"
-        axes[idx].set_title(f"{method}\n{conn_icon} {scores['floor_ratio']*100:.0f}% floor", 
+        conn_icon = "[+]" if is_connected else "[-]"
+        axes[idx].set_title(f"{name}\n{conn_icon} {scores['floor_ratio']*100:.0f}% floor", 
                            fontsize=10)
         axes[idx].axis('off')
     
     # THRML
-    dungeons, _ = create_simple_dungeon(grid_size=size, seed=seed)
-    dungeon = np.array(dungeons[0])
+    dungeons, _ = generate_thrml(grid_size=size, n_samples=1, seed=seed, verbose=False)
+    dungeon = dungeons[0]
     is_connected, _ = check_connectivity(dungeon)
     scores = calculate_playability_score(dungeon)
     
     axes[4].imshow(dungeon, cmap=cmap, interpolation='nearest')
-    conn_icon = "✅" if is_connected else "❌"
+    conn_icon = "[+]" if is_connected else "[-]"
     axes[4].set_title(f"THRML (Ising)\n{conn_icon} {scores['floor_ratio']*100:.0f}% floor", 
                      fontsize=10)
     axes[4].axis('off')
@@ -175,7 +170,7 @@ def compare_all(size: int, seed: int):
 # Create Gradio interface
 with gr.Blocks(title="EntroPit - Probabilistic Dungeon Generator") as demo:
     gr.Markdown("""
-    # 🏰 EntroPit - Probabilistic Dungeon Generator
+    # EntroPit - Probabilistic Dungeon Generator
     
     Compare **THRML** (thermodynamic computing) against traditional procedural algorithms.
     
@@ -204,7 +199,7 @@ with gr.Blocks(title="EntroPit - Probabilistic Dungeon Generator") as demo:
                     trad_metrics = gr.Markdown()
             
             trad_button.click(
-                fn=generate_traditional,
+                fn=generate_traditional_ui,
                 inputs=[trad_method, trad_size, trad_seed],
                 outputs=[trad_output, trad_metrics]
             )
@@ -230,19 +225,13 @@ with gr.Blocks(title="EntroPit - Probabilistic Dungeon Generator") as demo:
                                               info="Note: Currently for reference only")
                     thrml_seed = gr.Number(value=42, label="Seed", precision=0)
                     thrml_button = gr.Button("Generate (Slower - Uses Gibbs Sampling)", variant="primary")
-                    
-                    gr.Markdown("""
-                    **⚠️ Note**: Parameter sliders are currently for reference only. 
-                    To actually modify THRML parameters, edit `entropit_quickstart.py`.
-                    See `ARCHITECTURE.md` for details on the energy function.
-                    """)
                 
                 with gr.Column():
                     thrml_output = gr.Image(label="Generated Dungeon")
                     thrml_metrics = gr.Markdown()
             
             thrml_button.click(
-                fn=generate_thrml,
+                fn=generate_thrml_ui,
                 inputs=[thrml_size, thrml_beta, thrml_edge_bias, thrml_coupling, thrml_seed],
                 outputs=[thrml_output, thrml_metrics]
             )
@@ -271,12 +260,12 @@ with gr.Blocks(title="EntroPit - Probabilistic Dungeon Generator") as demo:
     
     gr.Markdown("""
     ---
-    ### 📚 Learn More
+    ### Learn More
     - **README.md** - Project overview
     - **ARCHITECTURE.md** - Mathematical formulation
     - **benchmark.py** - Run full performance comparison
     
-    ### 🔬 Key Takeaways
+    ### Key Takeaways
     1. **Traditional methods are fast** but struggle with global constraints (connectivity)
     2. **THRML is slower** but naturally enforces constraints through energy minimization
     3. **Extropic hardware** will make THRML orders of magnitude faster, enabling real-time generation
