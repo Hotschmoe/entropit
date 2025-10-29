@@ -274,8 +274,10 @@ def visualize_comparison(results: List[Dict]):
         ax.axis('off')
     
     plt.tight_layout()
-    plt.savefig('benchmark_comparison.png', dpi=150, bbox_inches='tight')
-    print("\n[+] Saved: benchmark_comparison.png")
+    import os
+    os.makedirs('output', exist_ok=True)
+    plt.savefig('output/benchmark_comparison.png', dpi=150, bbox_inches='tight')
+    print("\n[+] Saved: output/benchmark_comparison.png")
     plt.show()
 
 

@@ -69,6 +69,8 @@ python entropit.py             # Full comparison demo
 python benchmark.py            # Performance comparison
 ```
 
+All generated images save to `output/` directory (gitignored).
+
 ---
 
 ## How to Experiment

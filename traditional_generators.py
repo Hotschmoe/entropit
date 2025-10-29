@@ -266,7 +266,9 @@ if __name__ == "__main__":
         ax.axis('off')
     
     plt.tight_layout()
-    plt.savefig('traditional_comparison.png', dpi=150, bbox_inches='tight')
-    print("[+] Generated traditional_comparison.png")
+    import os
+    os.makedirs('output', exist_ok=True)
+    plt.savefig('output/traditional_comparison.png', dpi=150, bbox_inches='tight')
+    print("[+] Generated output/traditional_comparison.png")
     plt.show()
 

@@ -294,7 +294,9 @@ if __name__ == "__main__":
     axes[2].axis('off')
     
     plt.tight_layout()
-    plt.savefig('entropit_demo.png', dpi=150, bbox_inches='tight')
-    print(f"\n[+] Saved comparison to 'entropit_demo.png'")
+    import os
+    os.makedirs('output', exist_ok=True)
+    plt.savefig('output/entropit_demo.png', dpi=150, bbox_inches='tight')
+    print(f"\n[+] Saved comparison to 'output/entropit_demo.png'")
     plt.show()
 

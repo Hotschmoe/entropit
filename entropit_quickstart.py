@@ -155,8 +155,10 @@ def visualize_dungeons(dungeons, n_show=4):
         ax.grid(which="minor", color="gray", linestyle='-', linewidth=0.5, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('entropit_dungeons.png', dpi=150, bbox_inches='tight')
-    print("[+] Saved visualization to 'entropit_dungeons.png'")
+    import os
+    os.makedirs('output', exist_ok=True)
+    plt.savefig('output/entropit_dungeons.png', dpi=150, bbox_inches='tight')
+    print("[+] Saved visualization to 'output/entropit_dungeons.png'")
     plt.show()
 
 
