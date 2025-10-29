@@ -2,25 +2,25 @@
 
 ## Overview
 
-EntroPit models dungeon generation as a **constraint satisfaction problem** solved through **probabilistic sampling** from an energy-based model (EBM). This document explains the mathematical formulation and implementation strategy.
+EntroPit models dungeon generation as a **constraint satisfaction problem** solved through **probabilistic sampling** from an energy-based model (EBM).
 
 ---
 
-## The Probabilistic Model
+## Probabilistic Model
 
-### Dungeon as a Probability Distribution
+### Boltzmann Distribution
 
-Rather than generating dungeons algorithmically, we define a probability distribution over all possible dungeon configurations:
+We define a probability distribution over all possible dungeon configurations:
 
 $$P(s) = \frac{1}{Z} e^{-\beta E(s)}$$
 
 Where:
-- \( s \) is a dungeon configuration (state of all tiles)
-- \( E(s) \) is the "energy" of that configuration
-- \( \beta \) is inverse temperature (annealing parameter)
-- \( Z \) is the partition function (normalization constant)
+- \( s \) = dungeon configuration (state of all tiles)
+- \( E(s) \) = energy of configuration
+- \( \beta \) = inverse temperature (annealing parameter)
+- \( Z \) = partition function (normalization)
 
-**Key insight**: Low-energy configurations are high-probability. By designing \( E(s) \) to make "good dungeons" have low energy, sampling from \( P(s) \) gives us good dungeons.
+**Key insight**: Low-energy configurations are high-probability. Design \( E(s) \) so "good dungeons" have low energy.
 
 ---
 
@@ -161,47 +161,16 @@ Low temp → refine to local optimum
 
 ---
 
-## Implementation Phases
+## Implementation Status
 
-### Phase 1: Minimal Viable Dungeon ✅ (Quick Start)
-
-```python
-- Grid of SpinNodes
+**Current**: `entropit_quickstart.py` implements the minimal viable dungeon:
+- Grid of SpinNodes (binary wall/floor)
 - Ising interactions (neighbor matching)
 - Edge biases (boundary walls)
 - Checkerboard block Gibbs sampling
 - Matplotlib visualization
-```
 
-**Status**: `entropit_quickstart.py` implements this!
-
-### Phase 2: Connectivity Constraints
-
-```python
-- Add soft connectivity penalties
-- Implement flood-fill check
-- Resample if disconnected
-- Visualize connected components
-```
-
-### Phase 3: Interactive UI
-
-```python
-- Gradio interface
-- User paints constraints (fixed walls/floors)
-- Clamped blocks in THRML
-- Real-time generation
-- Slider for parameters (β, room size, etc.)
-```
-
-### Phase 4: Advanced Features
-
-```python
-- Categorical nodes (doors, treasure, enemies)
-- Multi-floor dungeons (3D)
-- Path length constraints (spawn → exit distance)
-- Style transfer (learn from existing dungeons)
-```
+**Next steps**: See README.md for future features.
 
 ---
 
@@ -328,17 +297,17 @@ But **thermodynamic systems do this naturally** by equilibrating!
 
 ---
 
-## Next Steps
+## Summary
 
-1. **Run the Quick Start**: `python entropit_quickstart.py`
-2. **Read the Code**: Understand how THRML concepts map to implementation
-3. **Tweak Parameters**: Change `biases`, `weights`, `beta` and see what happens
-4. **Add Constraints**: Start simple (fix spawn tile), then grow
-5. **Build the UI**: Gradio makes it easy to add interactivity
+EntroPit maps dungeon design to energy minimization:
+1. Define energy function encoding "good dungeon" properties
+2. Use block Gibbs sampling to find low-energy configurations
+3. Leverage THRML for efficient PGM operations
+4. Scale to hardware acceleration when available
+
+The power comes from declarative design: specify *what* you want (through energy terms), not *how* to build it (through algorithms).
 
 ---
 
-**Welcome to probabilistic dungeon generation.** 🔥
-
-*Let physics design your levels.*
+*For implementation details, see `entropit_quickstart.py`. For getting started, see `README.md`.*
 
