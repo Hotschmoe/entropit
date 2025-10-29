@@ -18,7 +18,7 @@ import io
 from PIL import Image
 
 # Import generators
-from entropit import generate_traditional, generate_thrml, analyze_dungeon
+from gen_extropic import generate_traditional, generate_thrml, analyze_dungeon
 from benchmark import check_connectivity, calculate_playability_score
 
 

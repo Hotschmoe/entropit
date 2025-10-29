@@ -19,7 +19,7 @@ from thrml.models import IsingEBM, IsingSamplingProgram, hinton_init
 import jax
 
 # Import traditional generators
-import traditional_generators as trad
+import gen_traditional as trad
 from benchmark import check_connectivity, calculate_playability_score
 
 

@@ -204,7 +204,7 @@ def compare_all_generators(grid_size: int = 24, n_runs: int = 10, seed: int = 42
         n_runs: Number of runs per generator
         seed: Base random seed
     """
-    import traditional_generators as trad
+    import gen_traditional as trad
     from entropit_quickstart import create_simple_dungeon
     
     print("=" * 70)
