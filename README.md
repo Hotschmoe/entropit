@@ -203,6 +203,34 @@ This approach scales beyond dungeons to any constraint satisfaction problem:
 
 ---
 
+## Scaling to Real-World Complexity
+
+**Current Demo (16×16):**
+- Validates approach and tunes parameters
+- Traditional algorithms are faster at this scale
+
+**Target Scale (512×512 to 1024×1024):**
+- Traditional algorithms struggle with:
+  - Global connectivity guarantees
+  - Complex multi-constraint satisfaction  
+  - Computational cost (minutes to hours)
+
+- THRML + TSU Hardware enables:
+  - **100× faster generation** (minutes → seconds)
+  - **1000× lower energy** (kilowatts → watts)
+  - **Principled constraint satisfaction** (global optimization)
+
+**Roadmap:**
+- [x] Phase 1: Validate at 16×16 (current)
+- [ ] Phase 2: Scale to 128×128 (THRML simulation)
+- [ ] Phase 3: Scale to 512×512 (prepare for TSU)
+- [ ] Phase 4: 1024×1024 on TSU hardware (when available)
+
+**Progress Tracking:**
+See `docs/SCALING_EXPERIMENTS.md` for current results.
+
+---
+
 ## The Extropic Vision
 
 Extropic is building specialized hardware that makes sampling from probability distributions vastly more efficient by leveraging physical thermodynamics.
