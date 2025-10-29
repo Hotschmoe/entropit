@@ -8,11 +8,11 @@ Here's how to organize your EntroPit project files.
 
 ```
 entropit-project/
-├── README_ENTROPIT.md           # Project overview & vision
+├── README.md           # Project overview & vision
 ├── GETTING_STARTED.md           # Step-by-step tutorial
-├── ENTROPIT_ARCHITECTURE.md     # Technical deep-dive
-├── entropit_requirements.txt    # Python dependencies
-└── entropit_quickstart.py       # Minimal working example (RUN THIS FIRST!)
+├── ARCHITECTURE.md     # Technical deep-dive
+├── requirements.txt    # Python dependencies
+└── quickstart.py       # Minimal working example (RUN THIS FIRST!)
 ```
 
 **Action**: Create this directory and copy/create these 5 files to get started.
@@ -205,7 +205,7 @@ entropit-project/
 ```bash
 mkdir entropit-project && cd entropit-project
 # Create the 5 minimal files
-python entropit_quickstart.py  # Verify it works!
+python quickstart.py  # Verify it works!
 ```
 
 ### Week 1: Core
@@ -314,7 +314,7 @@ generated_dungeons/
 
 Don't build the full structure right away. Begin with:
 
-1. ✅ **Run `entropit_quickstart.py`**
+1. ✅ **Run `quickstart.py`**
 2. Experiment with parameters
 3. Add one feature at a time
 4. Refactor when things get messy
@@ -329,7 +329,7 @@ Start coding, organize later!
 
 If your project is growing and you need to refactor:
 
-1. Keep `entropit_quickstart.py` as reference
+1. Keep `quickstart.py` as reference
 2. Extract reusable functions to `entropit/core.py`
 3. Move UI code to `entropit_app.py`
 4. Add tests as you go

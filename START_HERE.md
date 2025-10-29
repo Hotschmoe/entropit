@@ -15,7 +15,7 @@ pip install jax jaxlib thrml matplotlib pillow numpy
 ### 2. Run Your First Dungeon
 
 ```bash
-python entropit_quickstart.py
+python quickstart.py
 ```
 
 ### 3. View Results
@@ -29,7 +29,7 @@ Open `entropit_dungeons.png` to see your generated dungeons!
 ## 📚 Documentation Guide
 
 ### New to the Project?
-**→ Read:** `README_ENTROPIT.md`
+**→ Read:** `README.md`
 - What EntroPit does
 - Why it matters
 - Feature roadmap
@@ -43,7 +43,7 @@ Open `entropit_dungeons.png` to see your generated dungeons!
 - Next steps
 
 ### Want Deep Understanding?
-**→ Read:** `ENTROPIT_ARCHITECTURE.md`
+**→ Read:** `ARCHITECTURE.md`
 - Mathematical formulation
 - PGM design
 - Energy functions
@@ -51,7 +51,7 @@ Open `entropit_dungeons.png` to see your generated dungeons!
 - Research directions
 
 ### Organizing Your Code?
-**→ Read:** `ENTROPIT_PROJECT_STRUCTURE.md`
+**→ Read:** `PROJECT_STRUCTURE.md`
 - Project layout
 - Development phases
 - File organization
@@ -64,8 +64,8 @@ Open `entropit_dungeons.png` to see your generated dungeons!
 ### Level 1: Explorer 🗺️
 **Goal:** Understand what's happening
 
-1. ✅ Run `entropit_quickstart.py`
-2. Read `README_ENTROPIT.md` (15 min)
+1. ✅ Run `quickstart.py`
+2. Read `README.md` (15 min)
 3. Tweak parameters in quickstart script
 4. Read `GETTING_STARTED.md` (30 min)
 5. Generate 20+ dungeons with different settings
@@ -77,7 +77,7 @@ Open `entropit_dungeons.png` to see your generated dungeons!
 ### Level 2: Builder 🔨
 **Goal:** Create your own features
 
-1. Read `ENTROPIT_ARCHITECTURE.md` sections 1-3 (45 min)
+1. Read `ARCHITECTURE.md` sections 1-3 (45 min)
 2. Add a fixed spawn point constraint
 3. Implement connectivity checking (NetworkX)
 4. Build a simple Gradio UI
@@ -90,7 +90,7 @@ Open `entropit_dungeons.png` to see your generated dungeons!
 ### Level 3: Innovator 🚀
 **Goal:** Push the boundaries
 
-1. Read full `ENTROPIT_ARCHITECTURE.md` (1-2 hours)
+1. Read full `ARCHITECTURE.md` (1-2 hours)
 2. Implement categorical nodes (doors, treasure)
 3. Add path-length constraints
 4. Create custom energy terms
@@ -293,16 +293,16 @@ The thermodynamic computing community is small but growing. Your work matters!
 Pick one:
 
 **🏃 I want to code RIGHT NOW**
-→ `python entropit_quickstart.py`
+→ `python quickstart.py`
 
 **📖 I want to understand first**
-→ Read `README_ENTROPIT.md`
+→ Read `README.md`
 
 **🔧 I want to build something specific**
-→ Read `GETTING_STARTED.md` then `ENTROPIT_ARCHITECTURE.md`
+→ Read `GETTING_STARTED.md` then `ARCHITECTURE.md`
 
 **🤔 I'm still not sure what this is**
-→ Read the "What It Does" section in `README_ENTROPIT.md`
+→ Read the "What It Does" section in `README.md`
 
 ---
 
@@ -318,7 +318,7 @@ pip install jax jaxlib thrml matplotlib pillow numpy
 # Copy quickstart script here (or write it from scratch!)
 
 # Generate your first probabilistic dungeon
-python entropit_quickstart.py
+python quickstart.py
 
 # View the result
 # (opens entropit_dungeons.png)
