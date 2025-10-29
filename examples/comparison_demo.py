@@ -76,7 +76,7 @@ def main():
         metrics = analyze_dungeon(dungeon, verbose=False)
         
         gen_time = metadata.get('generation_time', 0)
-        conn_status = "✅ Connected" if metrics['is_connected'] else f"❌ Disconnected ({metrics['num_components']} components)"
+        conn_status = "[✓] Connected" if metrics['is_connected'] else f"[✗] Disconnected ({metrics['num_components']} components)"
         
         print(f"    {conn_status}")
         print(f"    Floor: {metrics['floor_ratio']*100:.1f}% | Openness: {metrics['openness']:.2f} | Time: {gen_time*1000:.2f}ms")
@@ -99,7 +99,7 @@ def main():
         scores = calculate_playability_score(dungeon)
         
         axes[idx].imshow(dungeon, cmap=cmap, interpolation='nearest')
-        conn_icon = "✅" if is_connected else "❌"
+        conn_icon = "[✓]" if is_connected else "[✗]"
         axes[idx].set_title(
             f"{name}\n{conn_icon} {scores['floor_ratio']*100:.0f}% floor | Openness: {scores['openness']:.2f}",
             fontsize=10
