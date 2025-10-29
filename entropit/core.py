@@ -16,7 +16,7 @@ from thrml import SpinNode, Block, SamplingSchedule, sample_states
 from thrml.models import IsingEBM, IsingSamplingProgram, hinton_init
 import jax
 
-from entropit.analysis import check_connectivity, calculate_playability_score
+from .analysis import check_connectivity, calculate_playability_score
 
 
 def generate_thrml(

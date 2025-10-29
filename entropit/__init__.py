@@ -20,9 +20,9 @@ __version__ = "0.1.0"
 __author__ = "EntroPit Team"
 __license__ = "MIT"
 
-from entropit.core import generate_thrml, analyze_dungeon
-from entropit.traditional import generate_traditional
-from entropit.analysis import (
+from .core import generate_thrml, analyze_dungeon
+from .traditional import generate_traditional
+from .analysis import (
     check_connectivity,
     calculate_playability_score,
     benchmark_generator,

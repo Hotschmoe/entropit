@@ -3,7 +3,7 @@
 ## Current Structure (Phase 1)
 
 ```
-entropit/
+src/
 ├── entropit.py                 # Main API - generate_thrml(), generate_traditional()
 ├── entropit_ui.py              # Gradio web interface
 ├── entropit_quickstart.py      # Simple command-line demo
@@ -72,8 +72,7 @@ When the project grows, reorganize to:
 
 ```
 entropit/
-├── src/
-│   └── entropit/
+├── entropit/
 │       ├── __init__.py          # Public API exports
 │       ├── core/
 │       │   ├── __init__.py

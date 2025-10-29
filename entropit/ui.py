@@ -19,9 +19,9 @@ import io
 from PIL import Image
 from typing import Tuple
 
-from entropit.core import generate_thrml, analyze_dungeon
-from entropit.traditional import generate_traditional
-from entropit.analysis import check_connectivity, calculate_playability_score
+from .core import generate_thrml, analyze_dungeon
+from .traditional import generate_traditional
+from .analysis import check_connectivity, calculate_playability_score
 
 
 def render_dungeon(dungeon: np.ndarray, title: str = "") -> Image.Image:
@@ -339,3 +339,6 @@ def launch_ui(share: bool = False):
     demo = create_ui()
     demo.launch(share=share)
 
+
+if __name__ == "__main__":
+    launch_ui()
