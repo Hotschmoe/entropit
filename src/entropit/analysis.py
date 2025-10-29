@@ -1,19 +1,18 @@
 """
-Dungeon Generator Benchmarking Framework
-=========================================
-Compare THRML-based generation against traditional algorithms.
+EntroPit - Analysis and Benchmarking
+=====================================
 
-Metrics:
-- Generation time
-- Connectivity (are all floors reachable?)
-- Playability score
-- Constraint satisfaction
-- Visual quality metrics
+Tools for analyzing dungeon quality and comparing generation methods.
+
+This module provides:
+- Connectivity checking (graph-based reachability analysis)
+- Playability scoring (floor ratio, openness, room quality)
+- Benchmarking framework for comparing generators
 """
 
 import time
 import numpy as np
-from typing import Dict, Callable, List, Tuple
+from typing import Dict, Callable, List, Tuple, Optional
 import networkx as nx
 
 
@@ -21,11 +20,22 @@ def check_connectivity(dungeon: np.ndarray) -> Tuple[bool, int]:
     """
     Check if all floor tiles form a single connected component.
     
+    Uses NetworkX to build a graph of floor tiles and count connected components.
+    A dungeon is "playable" if all floors are reachable from any starting point.
+    
     Args:
         dungeon: Boolean array where True = floor
         
     Returns:
-        (is_connected, num_components)
+        (is_connected, num_components) where:
+            - is_connected: True if all floors form one connected region
+            - num_components: Number of disconnected floor regions
+            
+    Example:
+        >>> dungeon = generate_thrml(grid_size=16)[0][0]
+        >>> connected, components = check_connectivity(dungeon)
+        >>> if connected:
+        ...     print("Dungeon is fully connected!")
     """
     height, width = dungeon.shape
     
@@ -61,11 +71,22 @@ def calculate_playability_score(dungeon: np.ndarray) -> Dict[str, float]:
     """
     Heuristic playability metrics.
     
+    Analyzes dungeon characteristics that affect gameplay quality:
+    - Floor ratio: How much of the dungeon is explorable
+    - Connectivity: Whether all areas are reachable
+    - Openness: How cramped vs spacious the dungeon feels
+    - Room quality: Distinction between rooms and corridors
+    
     Returns dict with scores:
-    - floor_ratio: Percentage of floor tiles (0-1)
-    - connectivity_score: 1.0 if fully connected, else 0.0
-    - openness: Average number of floor neighbors per floor tile
-    - room_quality: Variance in local floor density (higher = more rooms vs corridors)
+        - floor_ratio: Percentage of floor tiles (0-1)
+        - connectivity_score: 1.0 if fully connected, else 0.0
+        - openness: Average number of floor neighbors per floor tile (0-1)
+        - room_quality: Variance in local floor density (higher = more rooms vs corridors)
+        
+    Example:
+        >>> scores = calculate_playability_score(dungeon)
+        >>> print(f"Floor coverage: {scores['floor_ratio']*100:.1f}%")
+        >>> print(f"Openness: {scores['openness']:.2f}")
     """
     height, width = dungeon.shape
     total_tiles = height * width
@@ -128,13 +149,32 @@ def benchmark_generator(
     """
     Benchmark a dungeon generator.
     
+    Runs the generator multiple times and computes aggregate statistics
+    for generation time, connectivity rate, and quality metrics.
+    
     Args:
-        name: Generator name
-        generator_func: Function that returns a dungeon array
+        name: Generator name (for display)
+        generator_func: Function that returns a dungeon array (no arguments)
         n_runs: Number of runs for averaging
         
     Returns:
-        Dict with benchmark results
+        Dict with benchmark results:
+            - name: Generator name
+            - n_runs: Number of iterations
+            - avg_time_ms: Average generation time in milliseconds
+            - std_time_ms: Standard deviation of generation time
+            - connectivity_rate: Fraction of generated dungeons that are connected
+            - metrics: Dict of averaged playability metrics
+            - sample_dungeon: First generated dungeon (for visualization)
+            
+    Example:
+        >>> from entropit import generate_thrml
+        >>> results = benchmark_generator(
+        ...     "THRML",
+        ...     lambda: generate_thrml(grid_size=24, verbose=False)[0][0],
+        ...     n_runs=10
+        ... )
+        >>> print(f"{results['name']}: {results['avg_time_ms']:.1f}ms")
     """
     print(f"\n[*] Benchmarking: {name}")
     print(f"    Running {n_runs} iterations...")
@@ -187,71 +227,29 @@ def benchmark_generator(
     }
     
     # Print summary
-    print(f"    Time: {results['avg_time_ms']:.2f}ms +/- {results['std_time_ms']:.2f}ms")
+    print(f"    Time: {results['avg_time_ms']:.2f}ms ± {results['std_time_ms']:.2f}ms")
     print(f"    Connectivity: {results['connectivity_rate']*100:.0f}%")
-    print(f"    Floor ratio: {results['metrics']['floor_ratio']['mean']:.2f} +/- {results['metrics']['floor_ratio']['std']:.2f}")
-    print(f"    Openness: {results['metrics']['openness']['mean']:.2f} +/- {results['metrics']['openness']['std']:.2f}")
+    print(f"    Floor ratio: {results['metrics']['floor_ratio']['mean']:.2f} ± {results['metrics']['floor_ratio']['std']:.2f}")
+    print(f"    Openness: {results['metrics']['openness']['mean']:.2f} ± {results['metrics']['openness']['std']:.2f}")
     
     return results
 
 
-def compare_all_generators(grid_size: int = 24, n_runs: int = 10, seed: int = 42):
+def visualize_comparison(results: List[Dict], output_path: str = "output/benchmark_comparison.png"):
     """
-    Run comprehensive benchmark of all generators.
+    Create side-by-side visualization of all generators.
     
     Args:
-        grid_size: Size of dungeon grid
-        n_runs: Number of runs per generator
-        seed: Base random seed
+        results: List of benchmark result dicts from benchmark_generator()
+        output_path: Where to save the comparison image
+        
+    Example:
+        >>> results = [benchmark_generator(...) for generator in generators]
+        >>> visualize_comparison(results)
     """
-    import gen_traditional as trad
-    from entropit_quickstart import create_simple_dungeon
-    
-    print("=" * 70)
-    print("    DUNGEON GENERATOR BENCHMARK")
-    print(f"    Grid Size: {grid_size}x{grid_size}")
-    print(f"    Runs per generator: {n_runs}")
-    print("=" * 70)
-    
-    generators = [
-        ("Random", lambda: trad.random_dungeon(grid_size, grid_size, 0.5, seed)),
-        ("Cellular Automata", lambda: trad.cellular_automata_dungeon(grid_size, grid_size, seed=seed)),
-        ("BSP", lambda: trad.bsp_dungeon(grid_size, grid_size, seed=seed)),
-        ("Drunkard's Walk", lambda: trad.drunkards_walk_dungeon(grid_size, grid_size, seed=seed)),
-        ("THRML (Ising)", lambda: create_simple_dungeon(grid_size, seed)[0][0])
-    ]
-    
-    results = []
-    for name, gen_func in generators:
-        result = benchmark_generator(name, gen_func, n_runs)
-        results.append(result)
-    
-    # Print comparison table
-    print("\n" + "=" * 70)
-    print("    COMPARISON SUMMARY")
-    print("=" * 70)
-    print(f"{'Method':<20} {'Time (ms)':<12} {'Connected':<12} {'Floor %':<12} {'Openness':<12}")
-    print("-" * 70)
-    
-    for r in results:
-        print(f"{r['name']:<20} "
-              f"{r['avg_time_ms']:>8.1f}ms   "
-              f"{r['connectivity_rate']*100:>6.0f}%      "
-              f"{r['metrics']['floor_ratio']['mean']*100:>6.1f}%      "
-              f"{r['metrics']['openness']['mean']:>6.2f}")
-    
-    print("=" * 70)
-    
-    # Visualize samples
-    visualize_comparison(results)
-    
-    return results
-
-
-def visualize_comparison(results: List[Dict]):
-    """Create side-by-side visualization of all generators"""
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
+    import os
     
     n = len(results)
     fig, axes = plt.subplots(1, n, figsize=(4*n, 4))
@@ -274,24 +272,8 @@ def visualize_comparison(results: List[Dict]):
         ax.axis('off')
     
     plt.tight_layout()
-    import os
-    os.makedirs('output', exist_ok=True)
-    plt.savefig('output/benchmark_comparison.png', dpi=150, bbox_inches='tight')
-    print("\n[+] Saved: output/benchmark_comparison.png")
-    plt.show()
-
-
-if __name__ == "__main__":
-    import sys
-    
-    # Fix Windows console encoding
-    if sys.platform == 'win32':
-        try:
-            sys.stdout.reconfigure(encoding='utf-8')
-        except AttributeError:
-            import io
-            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    
-    # Run benchmark
-    results = compare_all_generators(grid_size=24, n_runs=10, seed=42)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    print(f"\n[+] Saved: {output_path}")
+    plt.close()
 

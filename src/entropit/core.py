@@ -1,16 +1,14 @@
 """
-EntroPit - Main Module
-======================
-Core dungeon generation functions using THRML and traditional methods.
+EntroPit - Core THRML-based Generation
+=======================================
 
-This module provides the main API for dungeon generation:
-- generate_thrml(): THRML-based probabilistic generation
-- generate_traditional(): Classical algorithmic generation
+THRML-powered dungeon generation using Ising energy-based models.
+This module provides the main API for probabilistic dungeon generation.
 """
 
 import numpy as np
 import jax.numpy as jnp
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Optional
 import time
 
 # Import THRML components
@@ -18,9 +16,7 @@ from thrml import SpinNode, Block, SamplingSchedule, sample_states
 from thrml.models import IsingEBM, IsingSamplingProgram, hinton_init
 import jax
 
-# Import traditional generators
-import gen_traditional as trad
-from benchmark import check_connectivity, calculate_playability_score
+from entropit.analysis import check_connectivity, calculate_playability_score
 
 
 def generate_thrml(
@@ -31,26 +27,35 @@ def generate_thrml(
     n_warmup: int = 200,
     n_samples: int = 1,
     steps_per_sample: int = 20,
-    seed: int = None,
+    seed: Optional[int] = None,
     verbose: bool = True
 ) -> Tuple[np.ndarray, Dict]:
     """
     Generate dungeon(s) using THRML Ising model.
     
+    This function creates dungeons by modeling each tile as a node in an
+    Ising-like energy-based model, then using Gibbs sampling to find
+    low-energy (high-quality) configurations.
+    
     Args:
         grid_size: Width and height of dungeon grid
-        beta: Inverse temperature (higher = more structured)
-        edge_bias: Bias for edge tiles (negative = prefer walls)
-        coupling: Neighbor interaction strength (higher = bigger rooms)
+        beta: Inverse temperature (higher = more structured, range: 0.5-5.0)
+        edge_bias: Bias for edge tiles (negative = prefer walls, range: -5.0 to 0.0)
+        coupling: Neighbor interaction strength (higher = bigger rooms, range: 0.3-2.0)
         n_warmup: Equilibration steps before sampling
         n_samples: Number of dungeon variants to generate
         steps_per_sample: Steps between samples (for decorrelation)
-        seed: Random seed for reproducibility
+        seed: Random seed for reproducibility (None = random)
         verbose: Print generation progress
         
     Returns:
         dungeons: Array [n_samples, grid_size, grid_size] of boolean arrays (True = floor)
-        metadata: Dict with generation info (time, parameters, etc.)
+        metadata: Dict with generation info (time, parameters, connectivity, etc.)
+        
+    Example:
+        >>> dungeons, meta = generate_thrml(grid_size=16, beta=2.0, seed=42)
+        >>> print(f"Generated {len(dungeons)} dungeons in {meta['generation_time']:.2f}s")
+        >>> print(f"Connectivity: {meta['connectivity_rate']*100:.0f}%")
     """
     if seed is None:
         import random
@@ -121,8 +126,13 @@ def generate_thrml(
     
     elapsed = time.time() - start_time
     
+    # Analyze connectivity
+    connectivity_count = sum(1 for d in dungeons if check_connectivity(d)[0])
+    connectivity_rate = connectivity_count / n_samples
+    
     if verbose:
         print(f"[+] Generated {n_samples} dungeon(s) in {elapsed:.2f}s")
+        print(f"    Connectivity: {connectivity_rate*100:.0f}% ({connectivity_count}/{n_samples})")
     
     # Build metadata
     metadata = {
@@ -131,6 +141,7 @@ def generate_thrml(
         'n_samples': n_samples,
         'generation_time': elapsed,
         'seed': seed,
+        'connectivity_rate': connectivity_rate,
         'parameters': {
             'beta': float(beta),
             'edge_bias': float(edge_bias),
@@ -143,85 +154,30 @@ def generate_thrml(
     return dungeons, metadata
 
 
-def generate_traditional(
-    method: str = "cellular_automata",
-    grid_size: int = 24,
-    seed: int = None,
-    verbose: bool = True,
-    **kwargs
-) -> Tuple[np.ndarray, Dict]:
-    """
-    Generate dungeon using traditional algorithmic methods.
-    
-    Args:
-        method: One of ["random", "cellular_automata", "bsp", "drunkards_walk"]
-        grid_size: Width and height of dungeon grid
-        seed: Random seed for reproducibility
-        verbose: Print generation progress
-        **kwargs: Method-specific parameters (see traditional_generators.py)
-        
-    Returns:
-        dungeon: Boolean array [grid_size, grid_size] where True = floor
-        metadata: Dict with generation info
-    """
-    if seed is None:
-        import random
-        seed = random.randint(0, 999999)
-    
-    start_time = time.time()
-    
-    method = method.lower().replace(" ", "_")
-    
-    if verbose:
-        print(f"[*] Generating {grid_size}x{grid_size} dungeon with {method}")
-        print(f"    Seed: {seed}")
-    
-    # Map to generator functions
-    generators = {
-        "random": trad.random_dungeon,
-        "cellular_automata": trad.cellular_automata_dungeon,
-        "bsp": trad.bsp_dungeon,
-        "drunkards_walk": trad.drunkards_walk_dungeon,
-    }
-    
-    if method not in generators:
-        raise ValueError(f"Unknown method '{method}'. Choose from: {list(generators.keys())}")
-    
-    gen_func = generators[method]
-    
-    # Call generator (most take width, height, seed as first args)
-    if method == "random":
-        dungeon = gen_func(grid_size, grid_size, kwargs.get('floor_probability', 0.5), seed)
-    else:
-        dungeon = gen_func(grid_size, grid_size, seed=seed, **kwargs)
-    
-    elapsed = time.time() - start_time
-    
-    if verbose:
-        print(f"[+] Generated dungeon in {elapsed*1000:.2f}ms")
-    
-    # Build metadata
-    metadata = {
-        'method': method,
-        'grid_size': grid_size,
-        'generation_time': elapsed,
-        'seed': seed,
-        'parameters': kwargs
-    }
-    
-    return dungeon, metadata
-
-
 def analyze_dungeon(dungeon: np.ndarray, verbose: bool = True) -> Dict:
     """
     Analyze dungeon quality and playability.
     
+    Computes various metrics including connectivity, floor coverage,
+    openness, and room quality.
+    
     Args:
         dungeon: Boolean array where True = floor
-        verbose: Print analysis results
+        verbose: Print analysis results to stdout
         
     Returns:
-        Dict with metrics (connectivity, floor_ratio, openness, etc.)
+        Dict with metrics:
+            - is_connected: bool (are all floors reachable?)
+            - num_components: int (number of disconnected regions)
+            - floor_ratio: float (percentage of floor tiles)
+            - openness: float (average neighbors per tile, 0-1)
+            - room_quality: float (variance in local density)
+            
+    Example:
+        >>> dungeon = dungeons[0]
+        >>> metrics = analyze_dungeon(dungeon, verbose=True)
+        >>> if metrics['is_connected']:
+        ...     print("Dungeon is fully connected!")
     """
     is_connected, num_components = check_connectivity(dungeon)
     scores = calculate_playability_score(dungeon)
@@ -241,62 +197,4 @@ def analyze_dungeon(dungeon: np.ndarray, verbose: bool = True) -> Dict:
         print(f"    Room quality: {metrics['room_quality']:.3f}")
     
     return metrics
-
-
-if __name__ == "__main__":
-    """Demo: Generate and compare dungeons"""
-    import sys
-    import matplotlib.pyplot as plt
-    from matplotlib.colors import ListedColormap
-    
-    # Fix Windows encoding
-    if sys.platform == 'win32':
-        try:
-            sys.stdout.reconfigure(encoding='utf-8')
-        except AttributeError:
-            import io
-            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    
-    print("=" * 60)
-    print("    EntroPit - Dungeon Generator Demo")
-    print("=" * 60)
-    print()
-    
-    seed = 42
-    size = 16
-    
-    # Generate with THRML
-    print("[1/2] THRML Generation:")
-    dungeons_thrml, meta_thrml = generate_thrml(grid_size=size, n_samples=2, seed=seed, verbose=True)
-    analyze_dungeon(dungeons_thrml[0], verbose=True)
-    
-    print()
-    
-    # Generate with traditional method
-    print("[2/2] Traditional Generation:")
-    dungeon_trad, meta_trad = generate_traditional("cellular_automata", grid_size=size, seed=seed, verbose=True)
-    analyze_dungeon(dungeon_trad, verbose=True)
-    
-    # Visualize side-by-side
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-    cmap = ListedColormap(['#2c3e50', '#ecf0f1'])
-    
-    axes[0].imshow(dungeons_thrml[0], cmap=cmap, interpolation='nearest')
-    axes[0].set_title('THRML (Sample 1)')
-    axes[0].axis('off')
-    
-    axes[1].imshow(dungeons_thrml[1], cmap=cmap, interpolation='nearest')
-    axes[1].set_title('THRML (Sample 2)')
-    axes[1].axis('off')
-    
-    axes[2].imshow(dungeon_trad, cmap=cmap, interpolation='nearest')
-    axes[2].set_title('Cellular Automata')
-    axes[2].axis('off')
-    
-    plt.tight_layout()
-    import os
-    os.makedirs('output', exist_ok=True)
-    plt.savefig('output/entropit_demo.png', dpi=150, bbox_inches='tight')
-    print(f"\n[+] Saved comparison to 'output/entropit_demo.png'")
-    plt.show()
 

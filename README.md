@@ -27,7 +27,15 @@ Think of it as **painting with probability** rather than deterministic algorithm
 ### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/entropit.git
+cd entropit
+
+# Install dependencies
 pip install -r requirements.txt
+
+# (Optional) Install in development mode
+pip install -e .
 ```
 
 For GPU support:
@@ -38,13 +46,13 @@ pip install jax[cuda12]  # Use cuda11 for older CUDA versions
 ### Option 1: Interactive UI (Recommended)
 
 ```bash
-python entropit_ui.py
+python examples/interactive_ui.py
 ```
 
 Then open `http://localhost:7860` in your browser to:
 - Generate dungeons with different algorithms
 - Compare THRML vs traditional methods
-- Adjust parameters interactively (now fully working!)
+- Adjust parameters interactively in real-time
 - View connectivity metrics
 
 ### Option 2: Use as Library
@@ -61,23 +69,23 @@ dungeon, metadata = generate_traditional("cellular_automata", grid_size=16, seed
 metrics = analyze_dungeon(dungeon)
 ```
 
-### Option 3: Command Line Demo
+### Option 3: Run Example Scripts
 
 ```bash
-python entropit_quickstart.py  # Simple demo
-python entropit.py             # Full comparison demo
-python benchmark.py            # Performance comparison
+python examples/quickstart.py       # Simple demo
+python examples/comparison_demo.py  # Side-by-side comparison
+python examples/benchmark_demo.py   # Performance comparison
 ```
 
-All generated images save to `output/` directory (gitignored).
+All generated images save to `output/` directory.
 
 ---
 
 ## How to Experiment
 
-### Tweak Parameters (Now Interactive!)
+### Tweak Parameters (Interactive!)
 
-Use the Gradio UI (`python entropit_ui.py`) to adjust:
+Use the Gradio UI (`python examples/interactive_ui.py`) to adjust:
 - **Grid Size**: 8-32
 - **Temperature (beta)**: 0.5-5.0 (higher = more structured)
 - **Edge Bias**: -5.0 to 0.0 (more negative = thicker walls)
@@ -100,22 +108,51 @@ dungeons, metadata = generate_thrml(
 
 ### Add Constraints
 
-See `ARCHITECTURE.md` for advanced techniques like clamping specific tiles.
+See `docs/ARCHITECTURE.md` for advanced techniques like clamping specific tiles.
 
 ---
 
-## Documentation & Files
+## Project Structure
 
-| File | Purpose |
-|------|---------|
-| **`README.md`** | This file - project overview and getting started |
-| **`ARCHITECTURE.md`** | Mathematical formulation, energy functions, PGM design |
-| **`entropit.py`** | **Main module** - `generate_thrml()` and `generate_traditional()` APIs |
-| **`entropit_ui.py`** | Interactive Gradio web interface |
-| **`entropit_quickstart.py`** | Simple command-line demo |
-| **`traditional_generators.py`** | Baseline algorithms (Random, CA, BSP, Drunkard's Walk) |
-| **`benchmark.py`** | Comprehensive comparison framework |
-| **`requirements.txt`** | All dependencies |
+```
+entropit/
+├── src/entropit/              # Main package
+│   ├── __init__.py           # Public API exports
+│   ├── core.py               # THRML-based generation
+│   ├── traditional.py        # Traditional algorithms
+│   ├── analysis.py           # Metrics and benchmarking
+│   └── ui.py                 # Gradio web interface
+│
+├── examples/                  # Example scripts
+│   ├── quickstart.py         # Simple getting started demo
+│   ├── comparison_demo.py    # Side-by-side method comparison
+│   ├── benchmark_demo.py     # Performance benchmarking
+│   └── interactive_ui.py     # Launch web interface
+│
+├── docs/                      # Documentation
+│   ├── ARCHITECTURE.md       # Technical deep-dive
+│   ├── GETTING_STARTED.md    # Beginner's guide
+│   ├── PROJECT_ORGANIZATION.md
+│   └── TODO.md               # Development roadmap
+│
+├── tests/                     # Unit tests (coming soon)
+├── output/                    # Generated dungeons (gitignored)
+│
+├── README.md                  # This file
+├── requirements.txt           # Python dependencies
+├── setup.py                   # Package installation
+├── pyproject.toml            # Modern packaging config
+└── LICENSE                    # MIT License
+```
+
+---
+
+## Documentation
+
+- **[Getting Started Guide](docs/GETTING_STARTED.md)** - Installation and first steps
+- **[Architecture Deep-Dive](docs/ARCHITECTURE.md)** - Mathematical formulation and PGM design
+- **[Project Organization](docs/PROJECT_ORGANIZATION.md)** - Code structure and development guide
+- **[Development Roadmap](docs/TODO.md)** - Future features and milestones
 
 ---
 
@@ -178,10 +215,17 @@ When the hardware ships, this approach could generate massive dungeons in millis
 
 ## Learning Resources
 
+### EntroPit Documentation
+- [Getting Started Guide](docs/GETTING_STARTED.md)
+- [Architecture Documentation](docs/ARCHITECTURE.md)
+- [Example Scripts](examples/)
+
+### THRML & Theory
 - [THRML Documentation](https://docs.thrml.ai/)
 - [THRML GitHub](https://github.com/extropic-ai/thrml)
 - [Ising Model (Wikipedia)](https://en.wikipedia.org/wiki/Ising_model)
 - [Gibbs Sampling (Wikipedia)](https://en.wikipedia.org/wiki/Gibbs_sampling)
+- [Extropic AI](https://www.extropic.ai/)
 
 ---
 

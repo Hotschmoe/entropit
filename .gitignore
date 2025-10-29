@@ -7,11 +7,13 @@ __pycache__/
 dist/
 build/
 *.egg
+*.whl
 
 # Virtual environments
 venv/
 env/
 ENV/
+.venv/
 
 # JAX cache
 .jax_cache/
@@ -21,6 +23,7 @@ output/
 *.png
 *.jpg
 *.gif
+*.json
 
 # IDE
 .vscode/
@@ -28,19 +31,65 @@ output/
 *.swp
 *.swo
 *~
+.history/
 
 # OS
 .DS_Store
 Thumbs.db
 desktop.ini
+.DS_Store?
 
 # Logs
 *.log
+logs/
 
 # Jupyter
 .ipynb_checkpoints/
+*.ipynb
 
 # Testing
 .pytest_cache/
 .coverage
 htmlcov/
+.tox/
+.nox/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff
+.ruff_cache/
+
+# Distribution / packaging
+.Python
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Environments
+.env
+.venv
+env.bak/
+venv.bak/
+
+# Keep output directory but ignore contents (except .gitkeep)
+output/*
+!output/.gitkeep

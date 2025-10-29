@@ -1,23 +1,105 @@
 """
-Traditional Dungeon Generators
-===============================
-Baseline algorithms for comparison with THRML-based generation.
+EntroPit - Traditional Dungeon Generators
+==========================================
 
-Implementations:
-- Random (baseline)
-- Cellular Automata (Game of Life-style)
-- BSP (Binary Space Partitioning)
-- Drunkard's Walk
+Baseline algorithmic approaches for comparison with THRML-based generation.
+
+This module implements classic procedural generation algorithms:
+- Random: Baseline (purely random floor/wall placement)
+- Cellular Automata: Game of Life-style organic caves
+- BSP: Binary Space Partitioning with rooms and corridors
+- Drunkard's Walk: Random walk corridor carving
 
 These serve as benchmarks to demonstrate THRML's advantages.
 """
 
 import numpy as np
-from typing import Tuple
+from typing import Tuple, Dict, Optional
 import random
+import time
 
 
-def random_dungeon(width: int, height: int, floor_probability: float = 0.5, seed: int = None) -> np.ndarray:
+def generate_traditional(
+    method: str = "cellular_automata",
+    grid_size: int = 24,
+    seed: Optional[int] = None,
+    verbose: bool = True,
+    **kwargs
+) -> Tuple[np.ndarray, Dict]:
+    """
+    Generate dungeon using traditional algorithmic methods.
+    
+    Args:
+        method: One of ["random", "cellular_automata", "bsp", "drunkards_walk"]
+        grid_size: Width and height of dungeon grid
+        seed: Random seed for reproducibility (None = random)
+        verbose: Print generation progress
+        **kwargs: Method-specific parameters:
+            - random: floor_probability (default: 0.5)
+            - cellular_automata: initial_floor_prob, iterations, birth_limit, death_limit
+            - bsp: min_room_size, max_room_size
+            - drunkards_walk: floor_percentage
+        
+    Returns:
+        dungeon: Boolean array [grid_size, grid_size] where True = floor
+        metadata: Dict with generation info (method, time, seed, etc.)
+        
+    Example:
+        >>> dungeon, meta = generate_traditional("cellular_automata", grid_size=24, seed=42)
+        >>> print(f"Generated in {meta['generation_time']*1000:.1f}ms")
+        
+    Raises:
+        ValueError: If method is not recognized
+    """
+    if seed is None:
+        import random
+        seed = random.randint(0, 999999)
+    
+    start_time = time.time()
+    
+    method = method.lower().replace(" ", "_")
+    
+    if verbose:
+        print(f"[*] Generating {grid_size}x{grid_size} dungeon with {method}")
+        print(f"    Seed: {seed}")
+    
+    # Map to generator functions
+    generators = {
+        "random": _random_dungeon,
+        "cellular_automata": _cellular_automata_dungeon,
+        "bsp": _bsp_dungeon,
+        "drunkards_walk": _drunkards_walk_dungeon,
+    }
+    
+    if method not in generators:
+        raise ValueError(f"Unknown method '{method}'. Choose from: {list(generators.keys())}")
+    
+    gen_func = generators[method]
+    
+    # Call generator (most take width, height, seed as first args)
+    if method == "random":
+        dungeon = gen_func(grid_size, grid_size, kwargs.get('floor_probability', 0.5), seed)
+    else:
+        dungeon = gen_func(grid_size, grid_size, seed=seed, **kwargs)
+    
+    elapsed = time.time() - start_time
+    
+    if verbose:
+        print(f"[+] Generated dungeon in {elapsed*1000:.2f}ms")
+    
+    # Build metadata
+    metadata = {
+        'method': method,
+        'grid_size': grid_size,
+        'generation_time': elapsed,
+        'seed': seed,
+        'parameters': kwargs
+    }
+    
+    return dungeon, metadata
+
+
+def _random_dungeon(width: int, height: int, floor_probability: float = 0.5, seed: Optional[int] = None) -> np.ndarray:
     """
     Baseline: purely random floor/wall placement.
     
@@ -44,12 +126,12 @@ def random_dungeon(width: int, height: int, floor_probability: float = 0.5, seed
     return dungeon
 
 
-def cellular_automata_dungeon(width: int, height: int, 
+def _cellular_automata_dungeon(width: int, height: int, 
                                initial_floor_prob: float = 0.45,
                                iterations: int = 5,
                                birth_limit: int = 4,
                                death_limit: int = 3,
-                               seed: int = None) -> np.ndarray:
+                               seed: Optional[int] = None) -> np.ndarray:
     """
     Cellular automata (similar to Conway's Game of Life).
     
@@ -100,10 +182,10 @@ def cellular_automata_dungeon(width: int, height: int,
     return dungeon
 
 
-def bsp_dungeon(width: int, height: int, 
+def _bsp_dungeon(width: int, height: int, 
                 min_room_size: int = 4,
                 max_room_size: int = 10,
-                seed: int = None) -> np.ndarray:
+                seed: Optional[int] = None) -> np.ndarray:
     """
     Binary Space Partitioning with rooms and corridors.
     
@@ -130,18 +212,15 @@ def bsp_dungeon(width: int, height: int,
         """Recursively split regions and add rooms"""
         if depth > 3 or w < min_room_size * 2 or h < min_room_size * 2:
             # Create a room in this region
-            # Ensure room fits with bounds checking
             max_room_w = min(max_room_size, w - 2)
             max_room_h = min(max_room_size, h - 2)
             
             if max_room_w < min_room_size or max_room_h < min_room_size:
-                # Region too small, skip
                 return None
             
             room_w = random.randint(min_room_size, max_room_w)
             room_h = random.randint(min_room_size, max_room_h)
             
-            # Position with bounds checking
             max_x_offset = max(0, w - room_w - 1)
             max_y_offset = max(0, h - room_h - 1)
             
@@ -184,9 +263,9 @@ def bsp_dungeon(width: int, height: int,
     return dungeon
 
 
-def drunkards_walk_dungeon(width: int, height: int,
+def _drunkards_walk_dungeon(width: int, height: int,
                             floor_percentage: float = 0.4,
-                            seed: int = None) -> np.ndarray:
+                            seed: Optional[int] = None) -> np.ndarray:
     """
     Drunkard's walk algorithm.
     
@@ -230,45 +309,4 @@ def drunkards_walk_dungeon(width: int, height: int,
         x, y = new_x, new_y
     
     return dungeon
-
-
-if __name__ == "__main__":
-    """Quick test of all generators"""
-    import sys
-    import matplotlib.pyplot as plt
-    from matplotlib.colors import ListedColormap
-    
-    # Fix Windows console encoding
-    if sys.platform == 'win32':
-        try:
-            sys.stdout.reconfigure(encoding='utf-8')
-        except AttributeError:
-            import io
-            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    
-    seed = 42
-    size = 24
-    
-    generators = [
-        ("Random", lambda: random_dungeon(size, size, 0.5, seed)),
-        ("Cellular Automata", lambda: cellular_automata_dungeon(size, size, seed=seed)),
-        ("BSP", lambda: bsp_dungeon(size, size, seed=seed)),
-        ("Drunkard's Walk", lambda: drunkards_walk_dungeon(size, size, seed=seed))
-    ]
-    
-    fig, axes = plt.subplots(1, 4, figsize=(16, 4))
-    cmap = ListedColormap(['#2c3e50', '#ecf0f1'])
-    
-    for ax, (name, gen_func) in zip(axes, generators):
-        dungeon = gen_func()
-        ax.imshow(dungeon, cmap=cmap, interpolation='nearest')
-        ax.set_title(f'{name}\n{np.sum(dungeon)} floors ({100*np.mean(dungeon):.1f}%)')
-        ax.axis('off')
-    
-    plt.tight_layout()
-    import os
-    os.makedirs('output', exist_ok=True)
-    plt.savefig('output/traditional_comparison.png', dpi=150, bbox_inches='tight')
-    print("[+] Generated output/traditional_comparison.png")
-    plt.show()
 
